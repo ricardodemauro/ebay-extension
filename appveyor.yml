@@ -26,5 +26,5 @@ deploy:
   username: $rebaysearch
   password:
     secure: W5R6ZKzp5+JvxT4W0beiraoXKrgZSo5+iGFJy9/09ymY686oZBG9i9Wgk1/Sg3fkKVt0bsTWbkzhFsCvinSIFQ==
-  artifact: ebay-extension
+  artifact: ebay-extension.zip
   appservice_environment_name: rebaysearch
