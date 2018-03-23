@@ -1,10 +1,11 @@
 version: '1.0.{build}'
 image: Visual Studio 2017
+configuration: Release
+platform: Any CPU
+clone_depth: 1
 branches:
   only:
   - master
-environment:
-  nodejs_version: "8.9.3"
 init:
   # Good practise, because Windows line endings are different from Unix/Linux ones
   - cmd: git config --global core.autocrlf true
@@ -13,7 +14,9 @@ before_build:
   - cmd: dotnet restore ./EbayChromeApp.sln --verbosity m
 build_script:
   - cmd: dotnet publish -c Release -o ../out ./\EbayChromeApp.Backend/EbayChromeApp.Backend.csproj
-clone_depth: 1
-on_finish :
-  # any cleanup in here
+test: off
+artifacts:
+- path: ./out
+  name: ebay-extension
+  type: WebDeployPackage
 deploy: off
