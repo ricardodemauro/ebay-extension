@@ -45,7 +45,7 @@ namespace EbayChromeApp.Backend.Hubs
                     productCollection.Add(await EbayServices.GetProductAsync(slugArray[i]));
                 }
 
-                return new Message<List<Product>> { Data = productCollection.ToList() };
+                return new Message<List<Product>> { Data = productCollection.Distinct().ToList() };
             }
 
             return await base.OnGetMessage(message, cancellationToken);

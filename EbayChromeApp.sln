@@ -23,6 +23,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "chrome-extension-ebay", "ch
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "37415"
+		SlnRelativePath = "chrome-extension-ebay\"
 	EndProjectSection
 EndProject
 Global
