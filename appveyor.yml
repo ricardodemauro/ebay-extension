@@ -19,4 +19,12 @@ artifacts:
 - path: ./out
   name: ebay-extension
   type: WebDeployPackage
-deploy: off
+deploy:
+- provider: AzureAppServiceZipDeploy
+  appservice_environment: true
+  website: rebaysearch
+  username: $rebaysearch
+  password:
+    secure: W5R6ZKzp5+JvxT4W0beiraoXKrgZSo5+iGFJy9/09ymY686oZBG9i9Wgk1/Sg3fkKVt0bsTWbkzhFsCvinSIFQ==
+  artifact: ebay-extension
+  appservice_environment_name: rebaysearch
