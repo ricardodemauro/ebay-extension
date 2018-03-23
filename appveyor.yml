@@ -15,8 +15,8 @@ build_script:
   - cmd: dotnet publish -c Release -o ../out ./\EbayChromeApp.Backend/EbayChromeApp.Backend.csproj
 artifacts:
   - path: '\out'
-   name: WebSite
-   type: WebDeployPackage
+  - name: WebSite
+  - type: WebDeployPackage
 clone_depth: 1
 on_finish :
   # any cleanup in here
