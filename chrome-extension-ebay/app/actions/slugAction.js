@@ -5,13 +5,12 @@ import {
     FETHING_PRODUCTIES,
     CLEAR_DATA } from '../actionTypes'
 
-import { beginFetch, endFetch, errorFetch, logFetch } from './systemActions'
+import {
+    getStorage,
+    setStorage
+} from '../components/AppStorage'
 
-const API_CODE = 'Eug0rYa1bHQMMmoOAQ1mKZhWdwVxnk/NuBmDWszN0aaH63OhNdmwpg=='
-const API_PRD_CODE = 'nMKps7SU90VN16pg4KmGyZ77IwXtlIUR06w1guRYkskLRhUp0Ebhqg=='
-export const getBaseUri = () => {
-    return window.location.protocol + '\\\\' + window.location.host + '\\'
-}
+import { beginFetch, endFetch, errorFetch, logFetch, addApiRequestCall, reachTheLimit } from './systemActions'
 
 export const fetchingSlug = () => {
     return {
@@ -45,126 +44,74 @@ export const clearData = () => {
     }
 }
 
-export const fetchDetailAsset = slugCollection => dispatch => {
-    if(slugCollection.length > 0) {
-        let productColl = []
-        for(let i = 0; i < slugCollection.length; i++) {
-            const slug = slugCollection[i]
-            for(let j = 0; j < slug.body.length; j++) {
-                const prd = slug.body[j]
-                productColl.push(prd)
+const getLastDate = (config) => {
+    
+    if(config.times >= 5) {
+        let firstDate = 0
+        let mostOld = Date.now()
+        for(let i = 0; i < config.dates.length; i++) {
+            const dDate = Date.parse(config.dates[i].date)
+            if(dDate < mostOld) {
+                firstDate = i
             }
         }
-        fetchFixedSize(productColl, dispatch)
+        return { found: true, date: config.dates[firstDate], index: firstDate }
     }
-}
-
-async function fetchFixedSize (productColl, dispatch) {
-    for(let k = 0; k < productColl.length; k++) {
-        console.info(`fetching length ${productColl.length} index ${k}`)
-        dispatch(beginFetch())
-        //dispatch(fetchingProducties())
-        try {
-            const response = await fetchProducties2([productColl[k]])
-            const json = await response.json()
-            dispatch(logFetch(JSON.stringify(json, null, 2)))
-            dispatch(retrivedDetailedAsset(json))
-        }
-        catch(err) {
-            dispatch(errorFetch(err))
-        }
-        dispatch(endFetch())
-    }
-
-    console.info('exiting fetchfixedsize')
-
-}
-
-export const fetchProducties2 = productColl => {
-    const uri = `https://ebayappextension.azurewebsites.net/api/productjs?code=${API_PRD_CODE}`
-    const payload = { producties: productColl }
-    let data = new FormData()
-    data.append('json', JSON.stringify(payload))
-    const opts = {
-        method: 'POST',
-        headers: { 
-            'Access-Control-Allow-Origin': '*', 
-            'Content-Type': 'application/json' 
-        },
-        mode: 'cors',
-        cache: 'default',
-        body: JSON.stringify(payload)
-    } 
-    return fetch(uri, opts)
-}
-
-export const fetchProducties = productColl => dispatch => {
-    const uri = `https://ebayappextension.azurewebsites.net/api/productjs?code=${API_PRD_CODE}`
-    const payload = { producties: productColl }
-    let data = new FormData()
-    data.append('json', JSON.stringify(payload))
-    const opts = {
-        method: 'POST',
-        headers: { 
-            'Access-Control-Allow-Origin': '*', 
-            'Content-Type': 'application/json' 
-        },
-        mode: 'cors',
-        cache: 'default',
-        body: JSON.stringify(payload)
-    } 
-    dispatch(beginFetch())
-    dispatch(fetchingProducties())
-    return fetch(uri, opts)
-        .then(response => response.json())
-        .then(json => {
-            dispatch(logFetch(JSON.stringify(json, null, 2)))
-            dispatch(retrivedDetailedAsset(json))
-            dispatch(endFetch())
-        })
-        .catch(err => {
-            dispatch(errorFetch(err))
-            dispatch(endFetch())
-        })
+    return { found: false }
 }
 
 export const fetchSlug = (name, socket) => dispatch => {
     console.info(`begin fetch slug ${name}`)
 
-    socket.setCallBack(dispatch(onFetchedSlugData))
-    dispatch(beginFetch())
-    socket.sendMessage({ operation: 'complete', data: name })
+    getStorage('TIMES')
+        .then(data => {
+            let config = { times: 0, dates: []}
+            if(data !== undefined && data != null && typeof data === 'string') {
+                config = JSON.parse(data)
+            }
+            else {
+                const dataValue = JSON.parse(data.TIMES)
+                config = Object.assign({}, config, dataValue)
+            }
+            let shouldContinue = false
+
+            const now = new Date()
+
+            const day = now.getDay()
+            const month = now.getMonth()
+            const year = now.getFullYear()
+
+            let filteredDate = config.dates.filter(value => {
+                const itemDate = new Date(value)
+                return itemDate.getDay() == day && itemDate.getFullYear() == year && itemDate.getMonth() == month
+            })
+
+            shouldContinue = filteredDate.length < 5
+            config.dates = filteredDate
+            config.dates.push(now.toISOString())
+
+            dispatch(addApiRequestCall(config.dates.length))
+
+            if(shouldContinue) {
+                const strData = JSON.stringify(config)
+                setStorage({ TIMES: strData })
+                    .then(() => {
+                        socket.setCallBack(dispatch(onFetchedSlugData))
+                        dispatch(beginFetch())
+                        socket.sendMessage({ operation: 'complete', data: name })
+                    })
+            }
+            else {
+                dispatch(reachTheLimit(config.dates.length - 1))
+            }
+        })
+        .catch((reason) => {
+            console.info(`something went wront ${reason}`)
+        })
 }
 
 const onFetchedSlugData = dispatch => data => {
     dispatch(logFetch(JSON.stringify(data, null, 2)))
-    //dispatch(retrivedSlug(data.data))
     dispatch(retrivedDetailedAsset(data.data))
     dispatch(endFetch())
 }
-
-export const fetchSlug2 = name => dispatch => {
-    const uri = `https://ebayappextension.azurewebsites.net/api/slugjs?code=${API_CODE}&name=${name}`
-    
-    const opts = {
-        method: 'GET',
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        mode: 'cors',
-        cache: 'default'
-    }
-    dispatch(beginFetch())
-    dispatch(fetchingSlug())
-    return fetch(uri, opts)
-        .then(response => response.json())
-        .then(json => {
-            dispatch(logFetch(JSON.stringify(json, null, 2)))
-            dispatch(retrivedSlug(json))
-            dispatch(endFetch())
-            dispatch(fetchDetailAsset(json))
-        })
-        .catch(err => {
-            dispatch(errorFetch(err))
-            dispatch(endFetch())
-        })
-}
-

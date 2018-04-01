@@ -7,6 +7,7 @@ import Paper from 'material-ui/Paper'
 import SimpleAppBar from '../components/SimpleAppBar'
 import SearchApp from './SearchApp'
 import Loader from '../components/Loader'
+import { InputLabel } from 'material-ui/Input'
 
 const styles = theme => ({
     root: theme.mixins.gutters({
@@ -22,7 +23,7 @@ const styles = theme => ({
     }),
     content: theme.mixins.gutters({
         width: 320,
-        height: 400,
+        height: 250,
         marginLeft: 0,
         marginRight: 0,
         paddingLeft: 0,
@@ -41,6 +42,8 @@ class App extends Component {
         json: PropTypes.string,
         error: PropTypes.string,
         date: PropTypes.string,
+        reqToday: PropTypes.number.isRequired,
+        reachedLimit: PropTypes.bool.isRequired,
         hasError: PropTypes.bool.isRequired,
         socket: PropTypes.object.isRequired
     }
@@ -50,8 +53,9 @@ class App extends Component {
     }
 
     render() {
-        const { classes, isFetching, error, json, hasError, socket } = this.props
+        const { classes, isFetching, error, json, hasError, socket, reqToday, reachedLimit } = this.props
         const statusTxt = isFetching ? 'Fetching' : ''
+        const labelVisisble = reachedLimit ? { display: 'block' } : { display: 'none' }
 
         return (
             <div>
@@ -61,16 +65,14 @@ class App extends Component {
                     <Paper className={classes.root}>
                         <Loader loading={isFetching}/>
                         <SearchApp socket={socket} />
-                    </Paper>
-                    <Paper className={classes.second}>
-                        <div>
-                            <div>error msg: '{error}'</div>
+                        <div style={labelVisisble}>
+                            <InputLabel>You reached the limit of today ({reqToday} requests).</InputLabel>
                         </div>
-                        <div>
-                            <div className={classes.json}>api data: {json}</div>
+                        <div style={labelVisisble}>
+                            <InputLabel>Try again tomorrow.</InputLabel>
                         </div>
+                        
                     </Paper>
-                    
                 </div>
             </div>
         )
@@ -79,13 +81,15 @@ class App extends Component {
 
 const mapStateToProps = state => {
     const { systemReducer } = state
-    const { isFetching, json, error } = systemReducer
+    const { isFetching, json, error, times, reachedLimit } = systemReducer
 
     return {
         isFetching: isFetching !== undefined ? isFetching : false,
         json: json ? json : '',
         error: error ? error.message : '',
-        hasError: error !== undefined
+        hasError: error !== undefined,
+        reqToday: times !== undefined ? times : 0,
+        reachedLimit: reachedLimit !== undefined ? reachedLimit : false
     }
 }
 

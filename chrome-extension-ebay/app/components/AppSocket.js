@@ -1,5 +1,5 @@
-const socketUri = 'ws://localhost:33427/ws'
-//const socketUri = 'ws://rebaysearch.azurewebsites.net/ws'
+//const socketUri = 'ws://localhost:33427/ws'
+const socketUri = 'ws://rebaysearch.azurewebsites.net/ws'
 
 
 const getAppSocket = (onOpen, onClose, onMessage, onError) => {

@@ -1,8 +1,14 @@
-import { API_REQUEST_BEGIN, API_REQUEST_END, API_REQUEST_ERROR, API_REQUEST_LOG } from '../actionTypes'
+import { API_REQUEST_BEGIN, 
+    API_REQUEST_END, 
+    API_REQUEST_ERROR, 
+    API_REQUEST_LOG, 
+    API_REQUEST_CALL, 
+    API_REQUEST_LIMIT } from '../actionTypes'
+import { getStorage, setStorage } from '../components/AppStorage'
 
 const api = (state = {}, action) => {
     const { deep } = state
-    const { json, error } = action
+    const { json, error, times } = action
     switch (action.type) {
         case API_REQUEST_BEGIN:
             const nDeepBegin = deep === undefined ? 1 : deep + 1
@@ -34,6 +40,17 @@ const api = (state = {}, action) => {
                 json,
                 date: strDate,
                 error: ''
+            }
+        case API_REQUEST_CALL:
+            return { 
+                ...state,
+                times
+            }
+        case API_REQUEST_LIMIT:
+            return {
+                ...state,
+                reachedLimit: true,
+                times
             }
         default:
             return state
