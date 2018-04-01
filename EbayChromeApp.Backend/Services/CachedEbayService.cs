@@ -30,6 +30,7 @@ namespace EbayChromeApp.Backend.Services
                 if (entry != null)
                 {
                     entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_envOptions.MaxMinutesInCache);
+                    entry.Priority = CacheItemPriority.Low;
                 }
                 return base.GetProductAsync(keyword, retryTime);
             });
@@ -46,6 +47,7 @@ namespace EbayChromeApp.Backend.Services
                 if (entry != null)
                 {
                     entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_envOptions.MaxMinutesInCache);
+                    entry.Priority = CacheItemPriority.Normal;
                 }
                 return base.GetSlugsAsync(keyword);
             });

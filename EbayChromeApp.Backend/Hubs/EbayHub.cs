@@ -46,7 +46,9 @@ namespace EbayChromeApp.Backend.Hubs
                     productCollection.Add(await _ebayService.GetProductAsync(slugArray[i]));
                 }
 
-                return new Message<List<Product>> { Data = productCollection.Distinct().ToList() };
+                var orderedProductCollection = productCollection.OrderBy(p => p.Name).ToArray();
+
+                return new Message<Product[]> { Data = orderedProductCollection };
             }
 
             return await base.OnGetMessage(message, cancellationToken);

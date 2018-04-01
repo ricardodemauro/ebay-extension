@@ -1,5 +1,6 @@
 ﻿using EbayChromeApp.Backend.Models;
 using EbayChromeApp.Backend.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System;
@@ -22,13 +23,16 @@ namespace EbayChromeApp.Backend.Services
 
         private readonly int _maxRetries;
 
-        public InternetEbayService(IOptions<EbayServiceOptions> ebayOptions)
+        private readonly ILogger<InternetEbayService> _logger;
+
+        public InternetEbayService(IOptions<EbayServiceOptions> ebayOptions, ILogger<InternetEbayService> logger)
         {
             var options = ebayOptions.Value;
             _uriFind = new Uri(options.FindUri);
             _uriSlug = new Uri(options.SlugUri);
             _maxRetries = options.MaxRetry;
             _letters = options.Letters;
+            _logger = logger;
         }
 
         public virtual async Task<SlugCollection> GetSlugsAsync(string keyword)
@@ -53,7 +57,7 @@ namespace EbayChromeApp.Backend.Services
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Error trying to get slug word {query}. Exception {ex.Message}");
+                    _logger.LogError($"Error trying to get slug word {query}. Exception {ex.Message}");
                 }
             }
 
@@ -77,7 +81,7 @@ namespace EbayChromeApp.Backend.Services
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError($"Error trying to get product {keyword}. Exception {ex.Message}");
+                    _logger.LogError($"Error trying to get product {keyword}. Exception {ex.Message}");
                     return await GetProductAsync(keyword, retryTime++);
                 }
 
