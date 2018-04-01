@@ -16,44 +16,40 @@ namespace EbayChromeApp.Backend.Hubs
 {
     public class EbayHub : Hub<MessageOperation, Message>
     {
-        private readonly int _maxThreads = 10;
+        private readonly IEbayService _ebayService;
 
-        public EbayHub(HttpContext context, WebSocket webSocket) : base(context, webSocket)
+        public EbayHub(HttpContext context, WebSocket webSocket, IEbayService ebayService) : base(context, webSocket)
         {
+            _ebayService = ebayService;
         }
 
         public async override Task<Message> OnGetMessage(MessageOperation message, CancellationToken cancellationToken)
         {
             if (message.Operation == "slug")
             {
-                SlugCollection slugCollection = await EbayServices.GetSlugsAsync(message.Data);
+                SlugCollection slugCollection = await _ebayService.GetSlugsAsync(message.Data);
                 return new Message<SlugCollection> { Data = slugCollection };
             }
             else if (message.Operation == "product")
             {
-                var result = await EbayServices.GetProductAsync(message.Data);
+                var result = await _ebayService.GetProductAsync(message.Data);
                 return new Message<Product> { Data = result };
             }
             else if (message.Operation == "complete")
             {
-                SlugCollection slugCollection = await EbayServices.GetSlugsAsync(message.Data);
+                SlugCollection slugCollection = await _ebayService.GetSlugsAsync(message.Data);
                 string[] slugArray = slugCollection.Distinct().ToArray();
                 BlockingCollection<Product> productCollection = new BlockingCollection<Product>(slugArray.Length);
 
                 for (int i = 0; i < slugArray.Length; i++)
                 {
-                    productCollection.Add(await EbayServices.GetProductAsync(slugArray[i]));
+                    productCollection.Add(await _ebayService.GetProductAsync(slugArray[i]));
                 }
 
                 return new Message<List<Product>> { Data = productCollection.Distinct().ToList() };
             }
 
             return await base.OnGetMessage(message, cancellationToken);
-        }
-
-        static Task<Product> ProcessProduct(string keyword)
-        {
-            return EbayServices.GetProductAsync(keyword);
         }
     }
 }

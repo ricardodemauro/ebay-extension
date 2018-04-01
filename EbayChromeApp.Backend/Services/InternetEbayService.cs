@@ -1,4 +1,6 @@
 ﻿using EbayChromeApp.Backend.Models;
+using EbayChromeApp.Backend.Options;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -11,22 +13,31 @@ using System.Threading.Tasks;
 
 namespace EbayChromeApp.Backend.Services
 {
-    public static class EbayServices
+    public class InternetEbayService : IEbayService
     {
-        static Uri URI_SLUG = new Uri("https://autosug.ebay.com/autosug");
-        static Uri URI_FIND = new Uri("https://svcs.ebay.com/services/search/FindingService/v1");
+        private readonly Uri _uriSlug;
+        private readonly Uri _uriFind;
 
-        static char[] LETTERS = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'w', 'x', 'y', 'z' };
+        private readonly string[] _letters;
 
-        static int MAX_RETRY = 3;
+        private readonly int _maxRetries;
 
-        public static async Task<SlugCollection> GetSlugsAsync(string keyword)
+        public InternetEbayService(IOptions<EbayServiceOptions> ebayOptions)
+        {
+            var options = ebayOptions.Value;
+            _uriFind = new Uri(options.FindUri);
+            _uriSlug = new Uri(options.SlugUri);
+            _maxRetries = options.MaxRetry;
+            _letters = options.Letters;
+        }
+
+        public virtual async Task<SlugCollection> GetSlugsAsync(string keyword)
         {
             SlugCollection slugCollection = new SlugCollection();
 
             HttpClient client = new HttpClient();
-            client.BaseAddress = URI_SLUG;
-            foreach (char letter in LETTERS)
+            client.BaseAddress = _uriSlug;
+            foreach (string letter in _letters)
             {
                 string query = $"{keyword} {letter}";
                 try
@@ -49,12 +60,12 @@ namespace EbayChromeApp.Backend.Services
             return slugCollection;
         }
 
-        public static async Task<Product> GetProductAsync(string keyword, int retryTime = 0)
+        public virtual async Task<Product> GetProductAsync(string keyword, int retryTime = 0)
         {
-            if (retryTime < MAX_RETRY)
+            if (retryTime < _maxRetries)
             {
                 HttpClient client = new HttpClient();
-                client.BaseAddress = URI_FIND;
+                client.BaseAddress = _uriFind;
                 string pathUri = $"?SECURITY-APPNAME=RicardoM-sampleke-PRD-6f1a91299-0d0b7d55&OPERATION-NAME=findItemsByKeywords&SERVICE-VERSION=1.0.0&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords={keyword}&paginationInput.entriesPerPage=2&GLOBAL-ID=EBAY-US&siteid=0";
                 try
                 {

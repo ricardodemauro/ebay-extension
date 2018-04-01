@@ -11868,8 +11868,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-//const socketUri = 'ws://localhost:33427/ws'
-var socketUri = 'ws://rebaysearch.azurewebsites.net/ws';
+var socketUri = 'ws://localhost:33427/ws';
+//const socketUri = 'ws://rebaysearch.azurewebsites.net/ws'
+
 
 var getAppSocket = function getAppSocket(onOpen, onClose, onMessage, onError) {
     var socket = new WebSocket(socketUri);
