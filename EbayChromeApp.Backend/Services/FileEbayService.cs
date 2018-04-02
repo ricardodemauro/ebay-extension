@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using EbayChromeApp.Backend.Models;
 using EbayChromeApp.Backend.Options;
 using EbayChromeApp.Backend.Storage;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace EbayChromeApp.Backend.Services
@@ -14,8 +15,8 @@ namespace EbayChromeApp.Backend.Services
     {
         private readonly IStorage _storage;
 
-        public FileEbayService(IStorage storage, IOptions<EbayServiceOptions> ebayOptions)
-            : base(ebayOptions)
+        public FileEbayService(IStorage storage, IOptions<EbayServiceOptions> ebayOptions, ILogger<InternetEbayService> logger)
+            : base(ebayOptions, logger)
         {
             _storage = storage;
         }

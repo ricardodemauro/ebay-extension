@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using EbayChromeApp.Backend.Models;
 using EbayChromeApp.Backend.Options;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace EbayChromeApp.Backend.Services
@@ -15,7 +16,8 @@ namespace EbayChromeApp.Backend.Services
         private readonly IMemoryCache _memoryCache;
         private readonly EnvorinmentOptions _envOptions;
 
-        public CachedEbayService(IOptions<EbayServiceOptions> ebayOptions, IOptions<EnvorinmentOptions> envOptions, IMemoryCache memoryCache) : base(ebayOptions)
+        public CachedEbayService(IOptions<EbayServiceOptions> ebayOptions, IOptions<EnvorinmentOptions> envOptions, IMemoryCache memoryCache, ILogger<InternetEbayService> logger)
+            : base(ebayOptions, logger)
         {
             _memoryCache = memoryCache;
             _envOptions = envOptions.Value;
