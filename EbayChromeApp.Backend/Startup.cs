@@ -57,6 +57,8 @@ namespace EbayChromeApp.Backend
             });
 
             services.Configure<EbayServiceOptions>(Configuration.GetSection("EbayService"));
+
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,17 +70,6 @@ namespace EbayChromeApp.Backend
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                string httpsOnly = Configuration["HTTPS"];
-                if (!string.IsNullOrEmpty(httpsOnly) && string.Equals(httpsOnly, "true", System.StringComparison.CurrentCultureIgnoreCase))
-                {
-                    var rOpts = new RewriteOptions()
-                    .AddRedirectToHttps();
-
-                    app.UseRewriter(rOpts);
-                }
-            }
 
             var webSocketOptions = new WebSocketOptions()
             {
@@ -88,12 +79,7 @@ namespace EbayChromeApp.Backend
             app.UseWebSockets(webSocketOptions);
             app.UseAppHub();
 
-            app.Use(async (context, next) =>
-            {
-                context.Response.StatusCode = 200;
-                await context.Response.WriteAsync("Its working!");
-
-            });
+            app.UseMvcWithDefaultRoute();
         }
     }
 }
