@@ -16,6 +16,8 @@ namespace EbayChromeApp.Backend.Options
 
         public int MaxRetry { get; set; }
 
+#pragma warning disable CA1819 // Properties should not return arrays
         public string[] Letters { get; set; }
+#pragma warning restore CA1819 // Properties should not return arrays
     }
 }

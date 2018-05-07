@@ -57,7 +57,7 @@ namespace EbayChromeApp.Backend.Services
             return slugCollection;
         }
 
-        private string GetCachedKey(string keyword)
+        internal static string GetCachedKey(string keyword)
         {
             var words = keyword.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             return string.Join("", words);

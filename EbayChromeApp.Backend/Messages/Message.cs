@@ -8,6 +8,6 @@ namespace EbayChromeApp.Backend.Messages
 {
     public class Message
     {
-        
+        public string IPAddress { get; set; }
     }
 }

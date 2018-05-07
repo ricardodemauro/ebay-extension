@@ -8,6 +8,8 @@ namespace EbayChromeApp.Backend.Messages
 {
     public class Message<T> : Message
     {
+        public int Code { get; set; }
+
         public T Data { get; set; }
     }
 }

@@ -8,6 +8,16 @@ namespace EbayChromeApp.Backend.Models
 {
     public class SlugCollection : List<string>
     {
+        public SlugCollection()
+            : base()
+        {
 
+        }
+
+        public SlugCollection(int capacity)
+            : base(capacity)
+        {
+
+        }
     }
 }

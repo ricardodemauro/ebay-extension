@@ -10,7 +10,9 @@ using Microsoft.Extensions.Logging;
 
 namespace EbayChromeApp.Backend
 {
+#pragma warning disable CA1052 // Static holder types should be Static or NotInheritable
     public class Program
+#pragma warning restore CA1052 // Static holder types should be Static or NotInheritable
     {
         private static string APP_SECRETS_KEY = "ac7cb23c-787b-4575-af3f-aa4cbd1624ad";
 

@@ -39,8 +39,10 @@ namespace EbayChromeApp.Backend.Services
         {
             SlugCollection slugCollection = new SlugCollection();
 
-            HttpClient client = new HttpClient();
-            client.BaseAddress = _uriSlug;
+            HttpClient client = new HttpClient
+            {
+                BaseAddress = _uriSlug
+            };
             foreach (string letter in _letters)
             {
                 string query = $"{keyword} {letter}";
@@ -68,8 +70,10 @@ namespace EbayChromeApp.Backend.Services
         {
             if (retryTime < _maxRetries)
             {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = _uriFind;
+                HttpClient client = new HttpClient
+                {
+                    BaseAddress = _uriFind
+                };
                 string pathUri = $"?SECURITY-APPNAME=RicardoM-sampleke-PRD-6f1a91299-0d0b7d55&OPERATION-NAME=findItemsByKeywords&SERVICE-VERSION=1.0.0&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords={keyword}&paginationInput.entriesPerPage=2&GLOBAL-ID=EBAY-US&siteid=0";
                 try
                 {

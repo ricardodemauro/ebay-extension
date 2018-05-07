@@ -13,5 +13,7 @@ namespace EbayChromeApp.Backend.Options
         public string AppDataDirectory { get; set; }
 
         public int MaxMinutesInCache { get; set; }
+
+        public int MaxCallTimes { get; set; }
     }
 }

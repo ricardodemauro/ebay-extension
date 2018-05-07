@@ -66,7 +66,10 @@ class App extends Component {
                         <Loader loading={isFetching}/>
                         <SearchApp socket={socket} />
                         <div style={labelVisisble}>
-                            <InputLabel>You reached the limit of today ({reqToday} requests).</InputLabel>
+                            <InputLabel>You reached the limit of today.</InputLabel>
+                        </div>
+                        <div style={labelVisisble}>
+                            <InputLabel>(You made {reqToday} requests in the past 24 hours)</InputLabel>
                         </div>
                         <div style={labelVisisble}>
                             <InputLabel>Try again tomorrow.</InputLabel>
@@ -93,5 +96,4 @@ const mapStateToProps = state => {
     }
 }
 
-//export default withStyles(styles)(App)
 export default withStyles(styles)(connect(mapStateToProps)(App))

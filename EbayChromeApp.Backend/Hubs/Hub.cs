@@ -17,11 +17,13 @@ namespace EbayChromeApp.Backend.Hubs
         where TIn : Message, new()
         where TOut : Message, new()
     {
+#pragma warning disable CA1819 // Properties should not return arrays
         protected byte[] Buffer { get; set; } = new byte[1024 * 4];
+#pragma warning restore CA1819 // Properties should not return arrays
 
-        private readonly HttpContext _context;
+        protected readonly HttpContext _context;
 
-        private readonly WebSocket _socket;
+        protected readonly WebSocket _socket;
 
         private readonly JsonSerializerSettings _jsonSerializerSettings;
 
@@ -68,6 +70,9 @@ namespace EbayChromeApp.Backend.Hubs
                 try
                 {
                     TIn data = JsonConvert.DeserializeObject<TIn>(message);
+
+                    data.IPAddress = _context.Connection.RemoteIpAddress.ToString();
+
                     TOut dataResult = await OnGetMessage(data, cancellationToken);
                     messageOut = JsonConvert.SerializeObject(dataResult, _jsonSerializerSettings);
                 }

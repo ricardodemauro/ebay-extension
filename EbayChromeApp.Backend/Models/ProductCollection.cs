@@ -13,5 +13,11 @@ namespace EbayChromeApp.Backend.Models
         {
 
         }
+
+        public ProductCollection()
+            : base()
+        {
+
+        }
     }
 }

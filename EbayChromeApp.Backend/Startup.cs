@@ -1,5 +1,5 @@
-﻿#define UseOptions // or NoOptions
-using EbayChromeApp.Backend.Hubs;
+﻿using EbayChromeApp.Backend.Data;
+using EbayChromeApp.Backend.Infrastructure;
 using EbayChromeApp.Backend.Options;
 using EbayChromeApp.Backend.Services;
 using EbayChromeApp.Backend.Storage;
@@ -7,13 +7,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
 using System.IO;
-using System.Net.WebSockets;
 
 namespace EbayChromeApp.Backend
 
@@ -45,12 +45,18 @@ namespace EbayChromeApp.Backend
                 c.RootDirectory = _env.ContentRootPath;
                 c.AppDataDirectory = Path.Combine(_env.ContentRootPath, "App_Data");
                 c.MaxMinutesInCache = Configuration.GetValue<int>("MaxMinutesInCache");
+                c.MaxCallTimes = Configuration.GetValue<int>("MaxCallTimes");
             });
 
             services.AddScoped<IStorage, FileStorage>();
             services.AddScoped<IEbayService, CachedEbayService>();
 
-            services.Configure<EbayServiceOptions>(Configuration.GetSection("EbaySerivce"));
+            services.AddDbContext<AppDbContext>(opts =>
+            {
+                opts.UseSqlite("Data Source=ebay.db");
+            });
+
+            services.Configure<EbayServiceOptions>(Configuration.GetSection("EbayService"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -74,46 +80,13 @@ namespace EbayChromeApp.Backend
                 }
             }
 
-#if NoOptions
-            #region UseWebSockets
-            app.UseWebSockets();
-            #endregion
-#endif
-#if UseOptions
-            #region UseWebSocketsOptions
             var webSocketOptions = new WebSocketOptions()
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
                 ReceiveBufferSize = 4 * 1024
             };
             app.UseWebSockets(webSocketOptions);
-            #endregion
-#endif
-            #region AcceptWebSocket
-            app.Use(async (context, next) =>
-            {
-                if (context.Request.Path == "/ws")
-                {
-                    if (context.WebSockets.IsWebSocketRequest)
-                    {
-                        WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-
-                        var ebayService = serviceProvider.GetService<IEbayService>();
-
-                        var _hub = new EbayHub(context, webSocket, ebayService);
-                        await _hub.ReceiveAsync();
-                    }
-                    else
-                    {
-                        context.Response.StatusCode = 400;
-                    }
-                }
-                else
-                {
-                    await next();
-                }
-
-            });
+            app.UseAppHub();
 
             app.Use(async (context, next) =>
             {
@@ -121,7 +94,6 @@ namespace EbayChromeApp.Backend
                 await context.Response.WriteAsync("Its working!");
 
             });
-            #endregion
         }
     }
 }
