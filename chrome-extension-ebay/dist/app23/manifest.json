@@ -1,0 +1,18 @@
+{
+    "manifest_version": 2,
+  
+    "name": "Ebay extension",
+    "description": "Ebay extension description",
+    "version": "1.0",
+  
+    "browser_action": {
+      "default_icon": "images/icon.png",
+      "default_popup": "index.html"
+    },
+    "permissions": [
+      "activeTab",
+      "storage",
+      "downloads"
+    ]
+  }
+  //https://stackoverflow.com/questions/3937000/chrome-extension-accessing-localstorage-in-content-script

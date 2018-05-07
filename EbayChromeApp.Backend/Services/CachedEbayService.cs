@@ -42,7 +42,7 @@ namespace EbayChromeApp.Backend.Services
 
         public async override Task<SlugCollection> GetSlugsAsync(string keyword)
         {
-            string key = GetCachedKey(keyword);
+            string key = GetSlugCachedKey(keyword);
 
             var slugCollection = await _memoryCache.GetOrCreateAsync(key, (entry) =>
             {
@@ -60,7 +60,13 @@ namespace EbayChromeApp.Backend.Services
         internal static string GetCachedKey(string keyword)
         {
             var words = keyword.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            return string.Join("", words);
+            return string.Concat("SLUG_", string.Join("", words));
+        }
+
+        internal static string GetSlugCachedKey(string keyword)
+        {
+            var words = keyword.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            return string.Concat("PRODUCT_", string.Join("", words));
         }
     }
 }

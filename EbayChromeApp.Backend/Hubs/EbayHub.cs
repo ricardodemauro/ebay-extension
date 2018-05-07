@@ -82,6 +82,7 @@ namespace EbayChromeApp.Backend.Hubs
             {
                 Created = DateTime.UtcNow,
                 IP = message.IPAddress,
+                Query = message.Data
             });
 
             await db.SaveChangesAsync();
